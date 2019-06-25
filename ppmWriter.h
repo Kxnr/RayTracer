@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <string>
-#include "vec3.h"
+#include <armadillo>
 
 class PPMImage
 {
@@ -43,7 +43,7 @@ public:
 
     void blankImage();
 
-    void colorVec(int x, int y, vec3 c);
+    void colorVec(int x, int y, arma::vec3 c);
 
     inline float &operator()(int i, int j, int k)
     {
@@ -72,11 +72,11 @@ void PPMImage::deleteImage()
     delete image;
 };
 
-void PPMImage::colorVec(int x, int y, vec3 c)
+void PPMImage::colorVec(int x, int y, arma::vec3 c)
 {
     for (int i = 0; i < 3; i++)
     {
-        image[idx(x, y, i)] = c[i];
+        image[idx(x, y, i)] = c(i);
     }
 }
 

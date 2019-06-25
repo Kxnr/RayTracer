@@ -9,21 +9,21 @@ float schlick(float cosine, float IOR);
 struct materialProperties
 {
     // these vectors are colors
-    vec3 reflectance = vec3(1.0, 1.0, 1.0);
-    vec3 absorption = vec3(0.0, 0.0, 0.0);
+    arma::vec3 reflectance = {1.0f, 1.0f, 1.0f};
+    arma::vec3 absorption = {0.0f, 0.0f, 0.0f};
 
     float transparency = 0;
     float roughness = 0;
     float IOR = 1.0;
 };
 
-vec3 randomInUnitSphere()
+arma::vec3 randomInUnitSphere()
 {
-    vec3 p;
+    arma::vec3 p;
     do
     {
-        p = 2.0 * vec3(drand48(), drand48(), drand48()) - vec3(1, 1, 1);
-    } while (p.squaredLength() >= 1.0);
+        p = 2.0 * arma::vec3({drand48(), drand48(), drand48()}) - arma::vec3({1, 1, 1});
+    } while (arma::norm(p) >= 1.0);
     return p;
 }
 
@@ -32,7 +32,7 @@ class Material
 public:
     Material(){};
     Material(const materialProperties props) { matProps = props; };
-    Material(const vec3 ref, const vec3 absorp, const float transp, const float rough, const float ior)
+    Material(const arma::vec3 ref, const arma::vec3 absorp, const float transp, const float rough, const float ior)
     {
         matProps.absorption = absorp;
         matProps.transparency = transp;
@@ -40,58 +40,58 @@ public:
         matProps.roughness = rough;
         matProps.IOR = ior;
     };
-    bool scatter(const ray &rin, const hitRecord &rec, vec3 &attenuation, ray &scattered) const;
-    vec3 reflect(const vec3 &v, const vec3 &n) const;
-    bool refract(const vec3 &v, const vec3 &n, vec3 &refracted) const;
+    bool scatter(const ray &rin, const hitRecord &rec, arma::vec3 &attenuation, ray &scattered) const;
+    arma::vec3 reflect(const arma::vec3 &v, const arma::vec3 &n) const;
+    bool refract(const arma::vec3 &v, const arma::vec3 &n, arma::vec3 &refracted) const;
 
     materialProperties matProps;
 };
 
-bool Material::scatter(const ray &rin, const hitRecord &rec, vec3 &attenuation, ray &scattered) const
+bool Material::scatter(const ray &rin, const hitRecord &rec, arma::vec3 &attenuation, ray &scattered) const
 {
 
     float nint;
-    vec3 reflected = reflect(unitVector(rin.direction()), rec.normal);
-    scattered = ray(rec.p, reflected * (1 - matProps.roughness) + (randomInUnitSphere() + rec.normal) * matProps.roughness);
+    arma::vec3 reflected = reflect(arma::normalise(rin.direction()), rec.normal);
+    scattered = ray(rec.p, reflected * (1 - matProps.roughness) + (randomInUnitSphere() + rec.normal) * matProps.roughness, rin.time());
     attenuation = matProps.reflectance;
 
     float reflectProb;
-    vec3 refracted;
+    arma::vec3 refracted;
 
     bool ref = refract(rin.direction(), rec.normal, refracted);
     if ((drand48() < matProps.transparency) && ref)
     {
-        scattered = ray(rec.p, refracted * (1 - matProps.roughness) + (randomInUnitSphere() + rec.normal) * matProps.roughness);
-        attenuation = vec3(1, 1, 1) - matProps.absorption;
+        scattered = ray(rec.p, refracted * (1 - matProps.roughness) + (randomInUnitSphere() + rec.normal) * matProps.roughness, rin.time());
+        attenuation = arma::vec3({1, 1, 1}) - matProps.absorption;
         return true;
     }
-    return (dot(scattered.direction(), rec.normal) > 0);
+    return (arma::dot(scattered.direction(), rec.normal) > 0);
 }
 
-vec3 Material::reflect(const vec3 &v, const vec3 &n) const
+arma::vec3 Material::reflect(const arma::vec3 &v, const arma::vec3 &n) const
 {
-    return v - 2 * dot(v, n) * n;
+    return v - 2 * arma::dot(v, n) * n;
 }
 
-bool Material::refract(const vec3 &v, const vec3 &n, vec3 &refracted) const
+bool Material::refract(const arma::vec3 &v, const arma::vec3 &n, arma::vec3 &refracted) const
 {
-    vec3 outwardNormal;
+    arma::vec3 outwardNormal;
     float nint;
     float cosine;
     if (dot(v, n) > 0)
     {
         outwardNormal = -n;
         nint = matProps.IOR;
-        cosine = nint * dot(v, n) / v.length();
+        cosine = nint * dot(v, n) / arma::norm(v);
     }
     else
     {
         outwardNormal = n;
         nint = 1.0 / matProps.IOR;
-        cosine = -dot(v, n) / v.length();
+        cosine = -dot(v, n) / arma::norm(v);
     }
-    vec3 uv = unitVector(v);
-    float dt = dot(uv, outwardNormal);
+    arma::vec3 uv = arma::normalise(v);
+    float dt = arma::dot(uv, outwardNormal);
     float discriminant = 1.0 - nint * nint * (1 - dt * dt);
     float reflectProb = schlick(cosine, matProps.IOR);
     if ((discriminant > 0) && (drand48() > reflectProb))

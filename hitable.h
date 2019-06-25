@@ -2,14 +2,15 @@
 #define HITABLEH
 
 #include "ray.h"
+#include "path.h"
 
 class Material;
 
 struct hitRecord
 {
     float t;
-    vec3 p;
-    vec3 normal;
+    arma::vec3 p;
+    arma::vec3 normal;
     Material *matPtr;
 };
 
