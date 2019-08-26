@@ -1,7 +1,6 @@
 #ifndef MATERIALH
 #define MATERIALH
 #include "hitable.h"
-#include "ray.h"
 #include <iostream>
 
 float schlick(float cosine, float IOR);
@@ -90,7 +89,7 @@ bool Material::refract(const arma::vec3 &v, const arma::vec3 &n, arma::vec3 &ref
         nint = 1.0 / matProps.IOR;
         cosine = -dot(v, n) / arma::norm(v);
     }
-    arma::vec3 uv = arma::normalise(v);
+    arma::vec3 uv = v / arma::norm(v);
     float dt = arma::dot(uv, outwardNormal);
     float discriminant = 1.0 - nint * nint * (1 - dt * dt);
     float reflectProb = schlick(cosine, matProps.IOR);

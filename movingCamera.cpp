@@ -2,14 +2,17 @@
 #include <iostream>
 #include <random>
 #include "ray.h"
+#include "BVH.h"
 #include "sphere.h"
-#include "hitableList.h"
 #include "ppmWriter.h"
 #include "movingCamera.h"
 #include "material.h"
 #include "path.h"
 
-// TODO: textuing
+#define NUM_OBJECTS 4
+
+// TODO: texturing
+// TODO: random scene
 // TODO: properly freeing memory
 
 arma::vec3 color(const ray &r, Hitable *world, int depth)
@@ -40,8 +43,8 @@ arma::vec3 color(const ray &r, Hitable *world, int depth)
 
 int main()
 {
-    int nx = 800;
-    int ny = 400;
+    int nx = 400;
+    int ny = 200;
     int ns = 100;
     PPMImage image(nx, ny);
 
@@ -50,20 +53,32 @@ int main()
     arma::vec3 vertical = {0.0, 2.0, 0.0};
     arma::vec3 origin = {0.0, 0.0, 0.0};
 
+    std::cerr << "Setting up materials" << std::endl;
+
     Material gray = Material(arma::vec3({0.4, 0.4, 0.4}), arma::vec3({1.0, 1.0, 1.0}), 0.0, 1.0, 1.3);
     Material red = Material(arma::vec3({0.6, 0.2, 0.2}), arma::vec3({1.0, 1.0, 1.0}), 0.0, 1.0, 1.3);
+    Material metal = Material(arma::vec3({0.6, 0.2, 0.6}), arma::vec3({.5, .5, .5}), 0.0, .7, 1.4);
+    Material glass = Material(arma::vec3({0.05, .01, .01}), arma::vec3({0.0, 0.0, .05}), .95, .02, 1.3);
 
-    Line *traj = new Line(arma::vec3({0,0,0}), arma::vec3({.5,0,0}));
+    Line *traj = new Line(arma::vec3({0,0,-1}), arma::vec3({0,0,-1.05}));
 
-    Hitable *list[2];
-    list[0] = new Sphere(arma::vec3({0, 0, -1}), 0.5, &red, traj);
-    list[1] = new Sphere(arma::vec3({0, -100.5, -1}), 100, &gray);
-    Hitable *world = new HitableList(list, 2);
+    std::cerr << "Creating objects" << std::endl;
+
+    Hitable *list[NUM_OBJECTS];
+    list[0] = new Sphere(traj, 0.5, &gray);
+    list[1] = new Sphere(arma::vec3({0, -100.5, -1}), 100, &red);
+    list[2] = new Sphere(arma::vec3({1, 0, -1}), 0.5, &metal);
+    list[3] = new Sphere(arma::vec3({-1, 0, -1}), 0.5, &glass);
 
     Camera cam(arma::vec3({-2, 2, 1}), arma::vec3({0, 0, -1}), arma::vec3({0, 1, 0}), .5, float(nx) / float(ny), .1, 3.4);
     float t0 = 0;
     float exposure = 1;
     float t;
+
+    //Hitable* world = new HitableList(list, NUM_OBJECTS);
+    Hitable* world = new BVHNode(list, NUM_OBJECTS, t0, t0 + exposure);
+
+    std::cerr << "Tracing rays" << std::endl;
 
     for (int j = ny - 1; j >= 0; j--)
     {
@@ -78,17 +93,28 @@ int main()
                 float v = float(j + drand48()) / float(ny);
                 t = t0 + drand48()*exposure;
 
+
                 ray r = cam.getRay(u, v, t);
                 col += color(r, world, 0);
+
             }
             col /= float(ns);
             image.colorVec(i, j, col);
         }
     }
 
+    std::cerr << "Saving Image" << std::endl;
+
     // cleanup
     image.write(2.0);
 
+    std::cerr << "Cleaning up" << std::endl;
     // TODO //
-    // delete list
+    // free list
+    for(int i = 0; i < NUM_OBJECTS; i++) {
+        delete list[i];
+    }
+
+    delete world;
+    delete traj;
 }

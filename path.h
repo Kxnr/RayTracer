@@ -2,7 +2,6 @@
 #define PATH_H
 
 #include "ray.h"
-#include <armadillo>
 
 class Path
 {
@@ -121,7 +120,7 @@ void Spline::get_params()
         }
     }
 
-    // TODO // slope constraints
+    // TODO: // slope constraints
 
     arma::mat params = arma::mat(4*n-4, 3);
     params.col(0) = arma::dot(arma::inv(M.slice(0)), x.col(0));  
@@ -139,13 +138,14 @@ arma::vec3 Spline::position(float t) const {
     }
 
     int part = i - 1;
-    i = (i < 0) ? 0 : (i > n-2) ? n-2  : i;
-    i = i*4;
+    part = (part < 0) ? 0 : (part > n-2) ? n-2  : part;
+
+    // turn partition into index
+    part = part*4;
 
 
-    return params.row(i) + params.row(i+1)*t + params.row(i+2)*t*t + params.row(i+3)*t*t*t;
+    return params.row(part) + params.row(part+1)*t + params.row(part+2)*t*t + params.row(part+3)*t*t*t;
 }
-
 
 class Line : public Path
 {
