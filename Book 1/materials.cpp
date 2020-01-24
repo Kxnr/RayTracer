@@ -69,8 +69,8 @@ int main()
             for (int s = 0; s < ns; s++)
             {
 
-                float u = float(i + drand48()) / float(nx);
-                float v = float(j + drand48()) / float(ny);
+                float u = float(i + (float) drand48()) / float(nx);
+                float v = float(j + (float) drand48()) / float(ny);
                 ray r = cam.getRay(u, v);
                 col += color(r, world, 0);
             }

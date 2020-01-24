@@ -22,7 +22,7 @@ vec3 randomInUnitSphere()
     vec3 p;
     do
     {
-        p = 2.0 * vec3(drand48(), drand48(), drand48()) - vec3(1, 1, 1);
+        p = 2.0 * vec3((float) drand48(), (float) drand48(), (float) drand48()) - vec3(1, 1, 1);
     } while (p.squaredLength() >= 1.0);
     return p;
 }
@@ -59,7 +59,7 @@ bool Material::scatter(const ray &rin, const hitRecord &rec, vec3 &attenuation, 
     vec3 refracted;
 
     bool ref = refract(rin.direction(), rec.normal, refracted);
-    if ((drand48() < matProps.transparency) && ref)
+    if (((float) drand48() < matProps.transparency) && ref)
     {
         scattered = ray(rec.p, refracted * (1 - matProps.roughness) + (randomInUnitSphere() + rec.normal) * matProps.roughness);
         attenuation = vec3(1, 1, 1) - matProps.absorption;
@@ -94,7 +94,7 @@ bool Material::refract(const vec3 &v, const vec3 &n, vec3 &refracted) const
     float dt = dot(uv, outwardNormal);
     float discriminant = 1.0 - nint * nint * (1 - dt * dt);
     float reflectProb = schlick(cosine, matProps.IOR);
-    if ((discriminant > 0) && (drand48() > reflectProb))
+    if ((discriminant > 0) && ((float) drand48() > reflectProb))
     {
         refracted = nint * (uv - outwardNormal * dt) - outwardNormal * sqrt(discriminant);
         return true;
