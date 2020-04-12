@@ -1,25 +1,26 @@
 #ifndef RAYH
 #define RAYH
-#include <armadillo>
+
+#include "vec3.h"
 
 class ray
 {
 public:
     ray(){};
-    ray(const arma::vec3 &a, const arma::vec3 &b, float time = 0)
+    ray(const vec3 &a, const vec3 &b, float time = 0)
     {
         A = a;
         B = b;
         _t = time;
     }
 
-    arma::vec3 origin() const { return A; };
-    arma::vec3 direction() const { return B; };
-    arma::vec3 pointAtParameter(float t) const { return A + t * B; };
+    vec3 origin() const { return A; };
+    vec3 direction() const { return B; };
+    vec3 pointAtParameter(float t) const { return A + t * B; };
     float time() const {return _t;};
 
-    arma::vec3 A;
-    arma::vec3 B;
+    vec3 A;
+    vec3 B;
     float _t;
 };
 
