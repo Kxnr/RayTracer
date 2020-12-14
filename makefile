@@ -21,10 +21,10 @@ SRC = $(patsubst %,$(SDIR)/%,$(_SRC))
 all: main 
 
 $(ODIR)/%.o: $(SDIR)/%.cpp $(DEPS)
-	$(CXX) $(CFLAGS) $(IFLAGS) -c -o $@.out $<
+	$(CXX) $(CFLAGS) $(IFLAGS) -c -o $@ $<
 
 main: $(OBJ)
-	$(CXX) $(CFLAGS) $(IFLAGS) -o $@ $^ $(LFLAGS)
+	$(CXX) $(CFLAGS) $(IFLAGS) -o $@.out $^ $(LFLAGS)
 
 .PHONY: clean
 
