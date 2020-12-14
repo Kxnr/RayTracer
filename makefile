@@ -21,7 +21,7 @@ SRC = $(patsubst %,$(SDIR)/%,$(_SRC))
 all: main 
 
 $(ODIR)/%.o: $(SDIR)/%.cpp $(DEPS)
-	$(CXX) $(CFLAGS) $(IFLAGS) -c -o $@ $<
+	$(CXX) $(CFLAGS) $(IFLAGS) -c -o $@.out $<
 
 main: $(OBJ)
 	$(CXX) $(CFLAGS) $(IFLAGS) -o $@ $^ $(LFLAGS)
